@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+    <title>CTF Term Project</title>
+</head>
+  <body>
+    <h1>CTF Term Project</h1>
+    <form method="post" enctype="multipart/form-data" style="display: flex; flex-direction: column; gap: 30px;">
+        <div>
+            <label>Challenge Name: </label> 
+            <input name="name"></input>
+        </div>
+        <div>
+            <label>Challenge Description: </label>
+            <input name="desc"></input>
+        </div>
+        <div>
+            <label>Challenge Category: </label> 
+            <input name="category"></input>
+        </div>
+        <div style="display: flex;">
+            <label>Challenge Hints/General Info: </label>
+            <textarea name="general-info" rows="10" cols="50"></textarea>
+        </div>
+        <div>
+            <label>Relevant Files: </label>
+            <input type="file" name="files" multiple></input>
+        </div>
+        <button style="width: 75px">Submit</button>
+    </form>
+    <div>
+        {% if name and desc and category and general_info %}
+        <h2>The Server Received</h2>
+        <p>Challenge Name: {{ name }}</p>
+        <p>Challenge Description: {{ desc }}</p>
+        <p>Challenge Category: {{ category }}</p>
+        <p>Challenge Hints/General Info: {{ general_info }}</p>
+        {% endif %} 
+        
+        {% if saved_files %}
+        <h2>Uploaded Files</h2>
+        <ul>
+            {% for file in saved_files %}
+            <li>{{ file }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+  </body>
+</html>
