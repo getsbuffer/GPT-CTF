@@ -17,6 +17,10 @@
             <label>Challenge Category: </label> 
             <input name="category"></input>
         </div>
+        <div>
+            <label>Flag Format: </label>
+            <input name="flag_format"></input>
+        </div>
         <div style="display: flex;">
             <label>Challenge Hints/General Info: </label>
             <textarea name="general-info" rows="10" cols="50"></textarea>
@@ -28,12 +32,13 @@
         <button style="width: 75px">Submit</button>
     </form>
     <div>
-        {% if name and desc and category and general_info %}
+        {% if name and desc and flag_format and category and general_info %}
         <h2>The Server Received</h2>
         <p>Challenge Name: {{ name }}</p>
         <p>Challenge Description: {{ desc }}</p>
         <p>Challenge Category: {{ category }}</p>
         <p>Challenge Hints/General Info: {{ general_info }}</p>
+        <p>Flag Format: {{ flag_format }}</p>
         {% endif %} 
         
         {% if saved_files %}
