@@ -18,7 +18,7 @@ def send_message_and_receive_response(role, query):
 
     chat_completion = client.chat.completions.create(
         messages=conversation_history,
-        model="gpt-4-turbo"
+        model="CTF Expert+"
     )
 
     return chat_completion.choices[0].message.content
