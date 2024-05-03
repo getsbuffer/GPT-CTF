@@ -32,22 +32,8 @@
         <button style="width: 75px">Submit</button>
     </form>
     <div>
-        {% if name and desc and flag_format and category and general_info %}
-        <h2>The Server Received</h2>
-        <p>Challenge Name: {{ name }}</p>
-        <p>Challenge Description: {{ desc }}</p>
-        <p>Challenge Category: {{ category }}</p>
-        <p>Challenge Hints/General Info: {{ general_info }}</p>
-        <p>Flag Format: {{ flag_format }}</p>
-        {% endif %} 
-        
-        {% if saved_files %}
-        <h2>Uploaded Files</h2>
-        <ul>
-            {% for file in saved_files %}
-            <li>{{ file }}</li>
-            {% endfor %}
-        </ul>
+        {% if message %}
+        <h2>{{ message }}</h2>
         {% endif %}
     </div>
   </body>
