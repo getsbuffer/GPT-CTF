@@ -13,7 +13,35 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 conversation_history = []
 
 
-def make_query(name, desc, category, flag_format, general_info, files):
+def send_message_and_receive_response(role, query):
+    conversation_history.append({"role": role, "content": query})
+
+    chat_completion = client.chat.completions.create(
+        messages=conversation_history,
+        model="gpt-4-turbo"
+    )
+
+    return chat_completion.choices[0].message.content
+
+
+def flag_found(response, flag_format):
+    conversation_history.append({"role": "system", "content": response})
+
+    response = send_message_and_receive_response(
+        'user', 'If you found the flag, display it in just one sentence so I can extract the data nicely. The flag format should only appear once. If the flag was not found, do not mention the flag format at all.')
+
+    start_index = response.find(flag_format)
+    if start_index == -1:
+        return [False, "Flag not found. Please try again."]
+
+    end_index = response.find("}", start_index + len(flag_format))
+    if end_index == -1:
+        return [False, "Flag not found. Please try again."]
+
+    return [True, response[start_index:end_index + 1]]
+
+
+def make_query(name, desc, category, flag_format, general_info, data_from_files):
     query = "Please find the flag given the following CTF problem and remember to display the flag. "
 
     if category:
@@ -41,6 +69,9 @@ def make_query(name, desc, category, flag_format, general_info, files):
     else:
         query = query + " No other general information or hints were provided."
 
+    if data_from_files:
+        query += data_from_files
+
     query = query + " With the given information, try to find the flag. Keep reprompting yourself until the flag is found."
     return query
 
@@ -57,63 +88,33 @@ def home():
     general_info = request.form.get('general-info')
     files = request.files.getlist('files')
 
-    saved_files = []
+    file_contents = []
     for file in files:
         if file and file.filename:
-            file_path = os.path.join(
-                app.config['UPLOAD_FOLDER'], file.filename)
-            file.save(file_path)
-            saved_files.append(file.filename)
+            content = file.stream.read().decode('utf-8')
+            file_contents.append(content)
 
-    query = make_query(name, desc, category, flag_format, general_info, files)
+    data_from_files = ', '.join(file_contents)
 
-    conversation_history.append({"role": "user", "content": query})
+    query = make_query(name, desc, category, flag_format,
+                       general_info, data_from_files)
 
-    chat_completion = client.chat.completions.create(
-        messages=conversation_history,
-        model="gpt-4"
-    )
+    for i in range(10):
+        if i == 0:
+            response = send_message_and_receive_response('user', query)
+        else:
+            response = send_message_and_receive_response(
+                'user', 'Please try to find the flag again.')
 
-    response = chat_completion.choices[0].message.content
+        print(f'i: {i} and response {response}')
 
-    print(response)
+        flag_found_results = flag_found(response, flag_format)
 
-    conversation_history.append({"role": "system", "content": response})
+        if flag_found_results[0]:
+            return render_template('index.html', message=flag_found_results[1])
 
-    conversation_history.append(
-        {"role": "user", "content": "If you found the flag, display it in just one sentence so I can extract the data nicely. The flag format should only appear once. If the flag was not found, do not mention the flag format at all."})
-
-    chat_completion = client.chat.completions.create(
-        messages=conversation_history,
-        model="gpt-4"
-    )
-
-    response = chat_completion.choices[0].message.content
-
-    start_index = response.find(flag_format)
-    if start_index == -1:
-        message = "Flag not found. Please try again."
-        return render_template('index.html', message=message)
-
-    end_index = response.find("}", start_index + len(flag_format))
-    if end_index == -1:
-        print("Ending character not found after the flag format.")
-        return
-
-    message = "The flag is: " + response[start_index:end_index + 1]
-
-    return render_template('index.html', message=message)
+    return render_template('index.html', message=flag_found_results[1])
 
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
-
-'''    chat_completion = client.chat.completions.create(
-        messages=[{
-            "role": "user",
-            "content": ""
-        }],
-        model="gpt-4"
-    )
-
-    print(chat_completion.choices[0].message.content)'''
