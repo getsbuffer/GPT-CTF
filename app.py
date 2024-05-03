@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
+from dotenv import load_dotenv
 import os
 from openai import OpenAI
+
+load_dotenv()
 
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
@@ -18,7 +21,7 @@ def send_message_and_receive_response(role, query):
 
     chat_completion = client.chat.completions.create(
         messages=conversation_history,
-        model="CTF Expert+"
+        model="gpt-4"
     )
 
     return chat_completion.choices[0].message.content
