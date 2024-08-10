@@ -1,2 +1,2 @@
-# CTF-Project
-Project for Dr. Liu's CIS-5930 
+# GPT-CTF
+Project for Dr. Liu's CIS-5930
